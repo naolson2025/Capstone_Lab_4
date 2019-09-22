@@ -116,20 +116,60 @@ def addNewRecordHolder():
     print(name + ' has been added to the database.\n')
 
 def searchForRecordHolderByName():
-    # open db file
     print()
+    # Get the name the user wants to search
     name = input('Enter the name of the juggler you want to locate: ')
-    search_for_record_sql = 'SELECT FROM jugglers WHERE name = ?'
-    with sqlite3.connect(jugglers) as conn:
-        find = conn.execute(search_for_record_sql, (name))
-
-    print(find)
+    # SQL syntax
+    search_for_record_sql = 'SELECT * FROM jugglers WHERE Name = ?'
+    # connect to the db
+    conn = sqlite3.connect(jugglers)
+    # row factory for printing
+    conn.row_factory = sqlite3.Row
+    # execute search
+    row = conn.execute(search_for_record_sql, (name, ))
+    # Find the first row with that matching name
+    row_data = row.fetchone()
     conn.close()
+
+    if row_data == 0:
+        print('No juggler was located by the name: ' + name)
+        print()
+    else:
+        print(row_data['Name'] + '\t' + row_data['Country'] + '\t' + str(row_data['NumberOfCatches']))
+        print()
 
 def updateNumberOfCatchesForRecordHolder():
     print()
+    # Get the name of the record holder the user wants to update
+    name = input('Enter the name of the juggler you want to update: ')
+    update_syntax = 'UPDATE jugglers SET NumberOfCatches = ? WHERE Name = ?'
+
+    while True:
+        try:
+            catches = int(input('Enter the updated number of catches: '))
+            if catches > 0:
+                break
+            else:
+                print('Number of catches must be a positive integer.')
+        except:
+            pass
+        print('Number of catches must be an integer')
+
+    with sqlite3.connect(jugglers) as conn:
+        updated = conn.execute(update_syntax, (catches, name))
+        updated_count = updated.rowcount
+    conn.close()
+    # If no rows were updated than the record holder was not found
+    if updated_count == 0:
+        print('This juggler was not located in the database.')
+        print()
+    # Print the name of the deleted person as confirmation
+    else:
+        print(name + '\'s catch count was updated.')
+        print()
 
 def deleteRecordHolderByName():
+    print()
     # Get the name of the record holder the user wants to delete
     name = input('Enter the name of the juggler you want to delete: ')
     # SQL synax for deleting by name
@@ -143,6 +183,7 @@ def deleteRecordHolderByName():
     # If no rows were deleted than the record holder was not found
     if deleted_count == 0:
         print('This juggler was not located in the database.')
+        print()
     # Print the name of the deleted person as confirmation
     else:
         print(name + ' was deleted')
