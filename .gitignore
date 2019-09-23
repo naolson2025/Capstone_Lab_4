@@ -5,3 +5,4 @@ sqlite3_analyzer.exe
 venv
 peewee_orm/venv
 chainsaw_jugglers_db.sqlite
+chainsaw_jugglers_peewee_db.sqlite
